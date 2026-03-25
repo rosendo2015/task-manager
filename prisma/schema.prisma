@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+model users {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  email      String   @unique @db.VarChar(150)
+  password   String   @db.VarChar(255)
+  role       Role
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relacionamentos
+  teams        team_members[]
+  tasks        tasks[]         @relation("UserTasks")
+  tasksHistory tasks_history[] @relation("ChangedBy")
+}
+
+model teams {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Relacionamentos
+  members team_members[]
+  tasks   tasks[]
+}
+
+model team_members {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  team_id    Int
+  created_at DateTime @default(now())
+
+  // Relacionamentos
+  user users @relation(fields: [user_id], references: [id])
+  team teams @relation(fields: [team_id], references: [id])
+}
+
+model tasks {
+  id          Int          @id @default(autoincrement())
+  title       String       @db.VarChar(200)
+  description String?      @db.Text
+  status      TaskStatus
+  priority    TaskPriority
+  assigned_to Int
+  team_id     Int
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  // Relacionamentos
+  assignedUser users           @relation("UserTasks", fields: [assigned_to], references: [id])
+  team         teams           @relation(fields: [team_id], references: [id])
+  history      tasks_history[]
+}
+
+model tasks_history {
+  id         Int        @id @default(autoincrement())
+  task_id    Int
+  changed_by Int
+  old_status TaskStatus
+  new_status TaskStatus
+  changed_at DateTime   @default(now())
+
+  // Relacionamentos
+  task tasks @relation(fields: [task_id], references: [id])
+  user users @relation("ChangedBy", fields: [changed_by], references: [id])
+}
+
+// Enums
+enum Role {
+  admin
+  member
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  completed
+}
+
+enum TaskPriority {
+  high
+  medium
+  low
+}
