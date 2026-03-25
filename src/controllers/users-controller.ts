@@ -5,6 +5,10 @@ import { hash } from "bcrypt"
 import { z } from "zod"
 
 class UsersController {
+    async index(request: Request, response: Response) {
+        const users = await prisma.users.findMany()
+        return response.json({ message: "Lista de users", users })
+    }
     async create(request: Request, response: Response) {
         const bodySchema = z.object({
             name: z.string().min(6),
