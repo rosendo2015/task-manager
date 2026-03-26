@@ -13,6 +13,6 @@ routes.use("/sessions", sessionsRoutes)
 routes.use(ensureAuthenticated)
 routes.use("/tasks", tasksRoutes)
 routes.use("/teams", teamsRoutes)
-routes.use("/teamMembers", teamMembersRoutes)
+routes.use("/team-members", teamMembersRoutes)
 
 export { routes }
