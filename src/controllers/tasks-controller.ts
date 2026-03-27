@@ -53,13 +53,68 @@ class TasksController {
     }
     async show(request: Request, response: Response) {
         const paramsSchema = z.object({
-            id: z.number()
+            id: z.string().regex(/^\d+$/).transform(Number) // valida string numérica e converte para número
         })
+
         const { id } = paramsSchema.parse(request.params)
-        const task = await prisma.tasks.findFirst({
+
+        const task = await prisma.tasks.findUnique({
             where: { id }
         })
-        return response.status(201).json(task)
+
+        if (!task) {
+            throw new AppError("Tarefa não encontrada!", 404)
+        }
+
+        return response.json(task)
     }
+    async update(request: Request, response: Response) {
+        const paramsSchema = z.object({
+            id: z.string().regex(/^\d+$/).transform(Number)
+        })
+        const { id } = paramsSchema.parse(request.params)
+
+        const bodySchema = z.object({
+            title: z.string().min(6).optional(),
+            description: z.string().optional(),
+            team_id: z.number().optional(),
+            assigned_to: z.number().optional(),
+            status: z.enum(["pending", "in_progress", "completed"]).optional(),
+            priority: z.enum(["high", "medium", "low"]).optional()
+        })
+
+        const parsedData = bodySchema.parse(request.body)
+
+        // Remove campos undefined para evitar conflito com exactOptionalPropertyTypes
+        const data = Object.fromEntries(
+            Object.entries(parsedData).filter(([_, value]) => value !== undefined)
+        )
+
+        const existingTask = await prisma.tasks.findUnique({ where: { id } })
+        if (!existingTask) {
+            throw new AppError("Tarefa não encontrada!", 404)
+        }
+
+        const updatedTask = await prisma.tasks.update({
+            where: { id },
+            data
+        })
+
+        return response.json(updatedTask)
+    }
+    async delete(request: Request, response: Response) {
+        const paramsSchema = z.object({
+            id: z.string().regex(/^\d+$/).transform(Number)
+        })
+
+        const { id } = paramsSchema.parse(request.params)
+
+        await prisma.tasks.delete({
+            where: { id }
+        })
+
+        return response.status(204).send()
+    }
+
 }
 export { TasksController }

@@ -1,4 +1,5 @@
 import { TasksController } from "@/controllers/tasks-controller";
+import { verifyUserAuthorization } from "@/middleware/verify-user-authorization";
 
 import { Router } from "express";
 
@@ -6,8 +7,11 @@ const tasksController = new TasksController()
 const tasksRoutes = Router()
 
 
-tasksRoutes.post("/", tasksController.create)
+
+tasksRoutes.post("/", verifyUserAuthorization(["admin"]), tasksController.create)
 tasksRoutes.get("/", tasksController.index)
 tasksRoutes.get("/:id", tasksController.show)
+tasksRoutes.patch("/:id", verifyUserAuthorization(["admin"]), tasksController.update)
+tasksRoutes.delete("/:id", verifyUserAuthorization(["admin"]), tasksController.delete)
 
 export { tasksRoutes }
