@@ -48,7 +48,18 @@ class TasksController {
         return response.json({ title, description, team_id, assigned_to, status, priority })
     }
     async index(request: Request, response: Response) {
-        return response.json({ message: "List" })
+        const tasks = await prisma.tasks.findMany()
+        return response.json(tasks)
+    }
+    async show(request: Request, response: Response) {
+        const paramsSchema = z.object({
+            id: z.number()
+        })
+        const { id } = paramsSchema.parse(request.params)
+        const task = await prisma.tasks.findFirst({
+            where: { id }
+        })
+        return response.status(201).json(task)
     }
 }
 export { TasksController }

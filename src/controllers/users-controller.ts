@@ -7,7 +7,7 @@ import { z } from "zod"
 class UsersController {
     async index(request: Request, response: Response) {
         const users = await prisma.users.findMany()
-        return response.json({ message: "Lista de users", users })
+        return response.json(users)
     }
     async create(request: Request, response: Response) {
         const bodySchema = z.object({

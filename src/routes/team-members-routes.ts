@@ -5,5 +5,6 @@ const teamMembersRoutes = Router()
 const teamMembersController = new TeamMembersController()
 
 teamMembersRoutes.post("/", teamMembersController.create)
+teamMembersRoutes.get("/", teamMembersController.index)
 
 export { teamMembersRoutes }

@@ -8,5 +8,6 @@ const tasksRoutes = Router()
 
 tasksRoutes.post("/", tasksController.create)
 tasksRoutes.get("/", tasksController.index)
+tasksRoutes.get("/:id", tasksController.show)
 
 export { tasksRoutes }
