@@ -45,15 +45,15 @@ class TasksController {
         })
 
 
-        return response.json({ title, description, team_id, assigned_to, status, priority })
+        return response.status(200).json({ title, description, team_id, assigned_to, status, priority })
     }
     async index(request: Request, response: Response) {
         const tasks = await prisma.tasks.findMany()
-        return response.json(tasks)
+        return response.status(200).json(tasks)
     }
     async show(request: Request, response: Response) {
         const paramsSchema = z.object({
-            id: z.string().regex(/^\d+$/).transform(Number) // valida string numérica e converte para número
+            id: z.coerce.number().positive()
         })
 
         const { id } = paramsSchema.parse(request.params)
@@ -66,11 +66,11 @@ class TasksController {
             throw new AppError("Tarefa não encontrada!", 404)
         }
 
-        return response.json(task)
+        return response.status(200).json(task)
     }
     async update(request: Request, response: Response) {
         const paramsSchema = z.object({
-            id: z.string().regex(/^\d+$/).transform(Number)
+            id: z.coerce.number().positive()
         })
         const { id } = paramsSchema.parse(request.params)
 
@@ -92,7 +92,7 @@ class TasksController {
 
         const existingTask = await prisma.tasks.findUnique({ where: { id } })
         if (!existingTask) {
-            throw new AppError("Tarefa não encontrada!", 404)
+            throw new AppError("Tarefa não encontrada!", 400)
         }
 
         const updatedTask = await prisma.tasks.update({
@@ -100,14 +100,19 @@ class TasksController {
             data
         })
 
-        return response.json(updatedTask)
+        return response.status(200).json(updatedTask)
     }
     async delete(request: Request, response: Response) {
         const paramsSchema = z.object({
-            id: z.string().regex(/^\d+$/).transform(Number)
+            id: z.coerce.number().positive()
         })
 
         const { id } = paramsSchema.parse(request.params)
+
+        const taskDeleted = await prisma.tasks.findFirst({ where: { id } })
+        if (!taskDeleted) {
+            throw new AppError("Tarefa não encontrada.", 400)
+        }
 
         await prisma.tasks.delete({
             where: { id }

@@ -1,4 +1,5 @@
 import { TeamMembersController } from "@/controllers/team-members-controller";
+import { verifyUserAuthorization } from "@/middleware/verify-user-authorization";
 import { Router } from "express";
 
 const teamMembersRoutes = Router()

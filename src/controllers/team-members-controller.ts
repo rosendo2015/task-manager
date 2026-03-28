@@ -32,5 +32,6 @@ class TeamMembersController {
         const teamMembers = await prisma.team_members.findMany()
         return response.status(200).json(teamMembers)
     }
+
 }
 export { TeamMembersController }
